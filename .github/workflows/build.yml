@@ -3,7 +3,6 @@ on:
   workflow_dispatch:
     inputs:
       ipa_url: https://litter.catbox.moe/lpq3abiihsqgvr2x.ipa
-        description: 'Direct download URL for the Spotify IPA'
         required: true
 
 jobs:
