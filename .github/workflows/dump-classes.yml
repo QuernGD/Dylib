@@ -1,0 +1,35 @@
+name: Dump Spotify Classes
+
+on:
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: "URL to decrypted Spotify IPA"
+        required: true
+
+jobs:
+  dump:
+    runs-on: macos-latest
+    steps:
+    - name: Download IPA
+      run: wget "${{ github.event.inputs.ipa_url }}" -O spotify.ipa
+
+    - name: Extract IPA
+      run: unzip -o spotify.ipa -d SpotifyApp > /dev/null
+
+    - name: Install class-dump
+      run: |
+        brew install class-dump
+
+    - name: Dump shuffle-related classes
+      run: |
+        BINARY=$(find SpotifyApp -name "Spotify" -type f | head -1)
+        echo "Binary: $BINARY"
+        class-dump "$BINARY" 2>/dev/null | grep -A 30 "QueueTrackShuffledList\|ShuffleAlgorithmItem\|PersonalizedShuffleService" > dump.txt
+        cat dump.txt
+
+    - name: Upload dump
+      uses: actions/upload-artifact@v4
+      with:
+        name: class-dump
+        path: dump.txt
