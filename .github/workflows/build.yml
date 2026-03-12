@@ -2,8 +2,9 @@ name: TrueShuffle
 
 on:
   workflow_dispatch:
-    inputs: 
-description: 'Direct download URL for the Spotify IPA'
+    inputs:
+      ipa_url:
+        description: 'Direct download URL for the Spotify IPA'
 
 jobs:
   inject:
@@ -17,26 +18,19 @@ jobs:
         run: brew install insert_dylib
 
       - name: Download IPA
-        run: |
-          curl -L "${{ github.event.inputs.ipa_url }}" -o Spotify.ipa
-          echo "IPA size: $(du -sh Spotify.ipa | cut -f1)"
+        run: curl -L "${{ github.event.inputs.ipa_url }}" -o Spotify.ipa
 
       - name: Inject dylib
         run: |
           unzip -q Spotify.ipa -d SpotifyUnpacked
-
           mkdir -p SpotifyUnpacked/Payload/Spotify.app/Frameworks
-          cp TrueShuffle.dylib SpotifyUnpacked/Payload/Spotify.app/Frameworks/
-
+          cp .github/workflows/TrueShuffle.dylib SpotifyUnpacked/Payload/Spotify.app/Frameworks/
           insert_dylib \
             --strip-codesig \
             --inplace \
             @executable_path/Frameworks/TrueShuffle.dylib \
             SpotifyUnpacked/Payload/Spotify.app/Spotify
-
           cd SpotifyUnpacked && zip -qr ../Spotify+TrueShuffle.ipa Payload/
-          cd ..
-          echo "Done: $(du -sh Spotify+TrueShuffle.ipa | cut -f1)"
 
       - name: Upload patched IPA
         uses: actions/upload-artifact@v4
