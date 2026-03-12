@@ -21,8 +21,6 @@ jobs:
           xcodebuild -configuration Release
           cp build/Release/insert_dylib /usr/local/bin/
 
-        run: brew install insert_dylib
-
       - name: Download IPA
         run: curl -L "${{ github.event.inputs.ipa_url }}" -o Spotify.ipa
 
