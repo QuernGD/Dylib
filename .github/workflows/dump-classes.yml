@@ -1,0 +1,34 @@
+name: Dump Spotify Classes
+
+on:
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: "URL to decrypted Spotify IPA"
+        required: true
+
+jobs:
+  dump:
+    runs-on: macos-latest
+    steps:
+    - name: Download IPA
+      run: wget "${{ github.event.inputs.ipa_url }}" -O spotify.ipa
+
+    - name: Extract IPA
+      run: unzip -o spotify.ipa -d SpotifyApp > /dev/null
+
+    - name: Dump shuffle-related symbols
+      run: |
+        BINARY=$(find SpotifyApp -name "Spotify" -type f | head -1)
+        echo "Binary: $BINARY"
+        # Use nm to list ObjC methods, filter shuffle-related ones
+        nm "$BINARY" 2>/dev/null | grep -i "shuffle\|Shuffle" | grep " t " | sed 's/.*_//' | sort -u > dump.txt
+        echo "--- ObjC class list ---" >> dump.txt
+        strings "$BINARY" | grep -E "^[A-Z][a-zA-Z]+Shuffle|^Shuffle[A-Z]|^SPT.*[Ss]huffle|^Queue.*[Ss]huffle" | sort -u >> dump.txt
+        cat dump.txt
+
+    - name: Upload dump
+      uses: actions/upload-artifact@v4
+      with:
+        name: class-dump
+        path: dump.txt
