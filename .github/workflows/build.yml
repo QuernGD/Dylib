@@ -15,6 +15,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install insert_dylib
+        run: |
+          git clone https://github.com/Tyilo/insert_dylib
+          cd insert_dylib
+          xcodebuild -configuration Release
+          cp build/Release/insert_dylib /usr/local/bin/
+
         run: brew install insert_dylib
 
       - name: Download IPA
