@@ -1,5 +1,4 @@
 name: TrueShuffle
-
 on:
   workflow_dispatch:
     inputs:
