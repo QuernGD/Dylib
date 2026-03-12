@@ -33,7 +33,7 @@ jobs:
             -install_name @rpath/TrueShuffle.dylib \
             -Os \
             -o TrueShuffle.dylib \
-            TrueShuffle/TrueShuffle.m
+            TrueShuffle.m
 
           echo "Built:"
           file TrueShuffle.dylib
